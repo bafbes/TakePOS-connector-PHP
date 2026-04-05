@@ -1,5 +1,5 @@
 <?php
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: *', true);
 //If file is too recent, ask for a second click just to ensure that the previous call has completely terminated
 echo "time elapsed=".(time()-filectime("invoice1.txt"))."\n";
 if (time()-filectime("invoice1.txt") <2){
