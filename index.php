@@ -370,7 +370,8 @@ if (!empty($_GET["set"])){
 						<?php }
 						
 						else if (strpos($_GET["page"], 'printer') !== false){
-						$printers = parse_ini_file("printers.ini");						
+                            touch("printers.ini");
+    						$printers = parse_ini_file("printers.ini");
 						?>
 						<div class="col-lg-6">
                                 <div class="card">
