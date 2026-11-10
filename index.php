@@ -57,6 +57,20 @@ if (!empty($_GET["set"])){
 	file_put_contents($file, $content);
 }
 
+// Configuration du TPE : IP en ligne 1, port en ligne 2 de tpe.ini
+$tpe_error = '';
+if (isset($_GET["page"]) && $_GET["page"] === 'tpe' && isset($_GET["tpe_ip"], $_GET["tpe_port"])) {
+	$tpe_ip = trim($_GET["tpe_ip"]);
+	$tpe_port = trim($_GET["tpe_port"]);
+	if (filter_var($tpe_ip, FILTER_VALIDATE_IP) === false) {
+		$tpe_error = 'Adresse IP invalide';
+	} elseif (filter_var($tpe_port, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1, 'max_range' => 65535))) === false) {
+		$tpe_error = 'Port invalide (1 à 65535)';
+	} else {
+		file_put_contents(__DIR__.'/tpe.ini', $tpe_ip."\n".$tpe_port."\n");
+	}
+}
+
 ?>
 
 <body class="animsition">
@@ -139,6 +153,10 @@ if (!empty($_GET["set"])){
 						<li>
                             <a href="index.php?page=display">
                                 <i class="fas fa-map-marker-alt"></i>Customer Display</a>
+                        </li>
+						<li>
+                            <a href="index.php?page=tpe">
+                                <i class="fas fa-credit-card"></i>TPE</a>
                         </li>
                     </ul>
                 </nav>
@@ -459,10 +477,53 @@ if (!empty($_GET["set"])){
                                 </div>
                             </div>
 						<?php
-						
+
 						}
-						
-						
+
+
+						else if ($_GET["page"] === 'tpe'){
+						$tpe_conf = @file(__DIR__.'/tpe.ini', FILE_IGNORE_NEW_LINES);
+						$tpe_ip_saved = isset($tpe_conf[0]) ? $tpe_conf[0] : '';
+						$tpe_port_saved = isset($tpe_conf[1]) ? $tpe_conf[1] : '';
+						?>
+						<div class="col-lg-6">
+                                <div class="card">
+                                    <form method="GET" action="index.php">
+                                    <input type="hidden" name="page" value="tpe">
+                                    <div class="card-header">
+                                        <strong>TPE</strong> settings
+                                    </div>
+                                    <div class="card-body card-block">
+                                        <?php if ($tpe_error) { ?>
+                                        <div class="alert alert-danger"><?php echo htmlspecialchars($tpe_error); ?></div>
+                                        <?php } elseif (isset($_GET["tpe_ip"])) { ?>
+                                        <div class="alert alert-success">Configuration enregistrée</div>
+                                        <?php } ?>
+                                        <div class="has-success form-group">
+                                            <label for="tpe_ip" class=" form-control-label">Adresse IP du TPE (ex : 192.168.1.50)</label>
+                                            <div class="col-12 col-md-9">
+                                                <input id="tpe_ip" name="tpe_ip" type="text" class="form-control" required value="<?php echo htmlspecialchars($tpe_ip_saved); ?>">
+                                            </div>
+                                        </div>
+                                        <div class="has-success form-group">
+                                            <label for="tpe_port" class=" form-control-label">Port du TPE (ex : 8888)</label>
+                                            <div class="col-12 col-md-9">
+                                                <input id="tpe_port" name="tpe_port" type="number" min="1" max="65535" class="form-control" required value="<?php echo htmlspecialchars($tpe_port_saved); ?>">
+                                            </div>
+                                        </div>
+                                    </div>
+									<div class="card-footer">
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fa fa-dot-circle-o"></i> Submit
+                                        </button>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+						<?php
+						}
+
+
 						?>
                         
                         <div class="row">
