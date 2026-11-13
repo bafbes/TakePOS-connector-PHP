@@ -10,7 +10,7 @@
  *
  * Retour JSON : {"status":"OK"|"KO"|"ERROR", "message":"...", "amount":"12.50", "response":{tags TPE}}
  *
- * Configuration : ../tpe.ini (ligne 1 = IP, ligne 2 = port), saisie dans index.php?page=tpe
+ * Configuration : ../tpe.ini (clés ip et port, cf. conf.lib.php), saisie dans index.php?page=tpe
  */
 
 header('Access-Control-Allow-Origin: *');
@@ -67,11 +67,13 @@ function tpe_parse_message($msg)
 }
 
 // --- Lecture de la configuration ---
-$conf = @file(__DIR__.'/../tpe.ini', FILE_IGNORE_NEW_LINES);
-$tpe_ip = isset($conf[0]) ? trim($conf[0]) : '';
-$tpe_port = isset($conf[1]) ? (int) trim($conf[1]) : 0;
+require_once __DIR__.'/conf.lib.php';
+$conffile = tpe_conf_file();
+$conf = tpe_conf_read();
+$tpe_ip = $conf['ip'];
+$tpe_port = (int) $conf['port'];
 if (filter_var($tpe_ip, FILTER_VALIDATE_IP) === false || $tpe_port < 1 || $tpe_port > 65535) {
-	tpe_reply('ERROR', 'TPE non configuré : renseigner IP et port dans TakePOS Connector', array(), 500);
+	tpe_reply('ERROR', 'TPE non configuré : renseigner IP et port dans TakePOS Connector ('.(is_file($conffile) ? 'contenu invalide' : 'fichier absent').' : '.$conffile.')', array(), 500);
 }
 
 // --- Contrôle des paramètres ---

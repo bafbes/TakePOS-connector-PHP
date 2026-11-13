@@ -57,7 +57,8 @@ if (!empty($_GET["set"])){
 	file_put_contents($file, $content);
 }
 
-// Configuration du TPE : IP en ligne 1, port en ligne 2 de tpe.ini
+// Configuration du TPE (tpe.ini)
+require_once __DIR__.'/tpe/conf.lib.php';
 $tpe_error = '';
 if (isset($_GET["page"]) && $_GET["page"] === 'tpe' && isset($_GET["tpe_ip"], $_GET["tpe_port"])) {
 	$tpe_ip = trim($_GET["tpe_ip"]);
@@ -67,7 +68,9 @@ if (isset($_GET["page"]) && $_GET["page"] === 'tpe' && isset($_GET["tpe_ip"], $_
 	} elseif (filter_var($tpe_port, FILTER_VALIDATE_INT, array('options' => array('min_range' => 1, 'max_range' => 65535))) === false) {
 		$tpe_error = 'Port invalide (1 à 65535)';
 	} else {
-		file_put_contents(__DIR__.'/tpe.ini', $tpe_ip."\n".$tpe_port."\n");
+		if (!tpe_conf_write($tpe_ip, $tpe_port)) {
+			$tpe_error = 'Impossible d\'écrire '.tpe_conf_file().' (droits en écriture ?)';
+		}
 	}
 }
 
@@ -482,9 +485,9 @@ if (isset($_GET["page"]) && $_GET["page"] === 'tpe' && isset($_GET["tpe_ip"], $_
 
 
 						else if ($_GET["page"] === 'tpe'){
-						$tpe_conf = @file(__DIR__.'/tpe.ini', FILE_IGNORE_NEW_LINES);
-						$tpe_ip_saved = isset($tpe_conf[0]) ? $tpe_conf[0] : '';
-						$tpe_port_saved = isset($tpe_conf[1]) ? $tpe_conf[1] : '';
+						$tpe_conf = tpe_conf_read();
+						$tpe_ip_saved = $tpe_conf['ip'];
+						$tpe_port_saved = $tpe_conf['port'];
 						?>
 						<div class="col-lg-6">
                                 <div class="card">
